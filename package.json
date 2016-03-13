@@ -1,0 +1,19 @@
+{
+  "name": "webrtc-tutorials",
+  "version": "0.0.1",
+  "description": "working through the webrtc-tutorials",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ca057/webrtc-tutorials.git"
+  },
+  "author": "Christian Ost",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/ca057/webrtc-tutorials/issues"
+  },
+  "homepage": "https://github.com/ca057/webrtc-tutorials#readme"
+}
