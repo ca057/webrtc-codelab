@@ -8,12 +8,12 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/ca057/webrtc-tutorials.git"
+    "url": "git+https://github.com/ca057/webrtc-codelab.git"
   },
   "author": "Christian Ost",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/ca057/webrtc-tutorials/issues"
+    "url": "://github.com/ca057/webrtc-codelab/issues"
   },
-  "homepage": "https://github.com/ca057/webrtc-tutorials#readme"
+  "homepage": "https://github.com/ca057/webrtc-codelab#readme"
 }
