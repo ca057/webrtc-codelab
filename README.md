@@ -1,2 +1,2 @@
 # webrtc-tutorials
-Working through the WebRTC tutorials.
+Working through the [WebRTC codelab](https://bitbucket.org/webrtc/codelab).
