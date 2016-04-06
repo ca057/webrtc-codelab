@@ -1,115 +1,155 @@
-let localStream = {};
-let localPeerConnection = {};
-let remotePeerConnection = {};
-let localVideo = {};
-let remoteVideo = {};
+let sendChannel = {};
+let receiveChannel = {};
+
+let dataChannelSend = {};
+let dataChannelReceive = {};
+
 let startButton = {};
-let callButton = {};
-let hangupButton = {};
-const constraints = {'video': true};
+let sendButton = {};
+let closeButton = {};
 
 const init = () => {
-  localVideo = document.getElementById('localVideo');
-  remoteVideo = document.getElementById('remoteVideo');
-
   startButton = document.getElementById('startButton');
-  callButton = document.getElementById('callButton');
-  hangupButton = document.getElementById('hangupButton');
+  sendButton = document.getElementById('sendButton');
+  closeButton = document.getElementById('closeButton');
+
+  dataChannelSend = document.getElementById('dataChannelSend');
+  dataChannelReceive = document.getElementById('dataChannelReceive');
 };
 
+/*
 const trace = (text) => {
   console.log(`${(performance.now() / 1000).toFixed(3)}: ${text}`);
 };
+*/
 
-const gotStream = (stream) => {
-  trace('Receive local stream');
-  localStream = stream;
-  localVideo.src = URL.createObjectURL(localStream);
-  callButton.disabled = false;
+const createConnection = () => {
+  const servers = null;
+
+  const gotLocalCandidate = (event) => {
+    trace('local ice callback');
+    if (event.candidate) {
+      window.remotePeerConnection.addIceCandidate(event.candidate);
+      trace(`Local ICE candidate: \n ${event.candidate.candidate}`);
+    }
+  };
+
+  const gotRemoteIceCandidate = (event) => {
+    trace('remote ice callback');
+    if (event.candidate) {
+      window.localPeerConnection.addIceCandidate(event.candidate);
+      trace(`Remote ICE candidate: \n ${event.candidate.candidate}`);
+    }
+  };
+
+  const gotRemoteDescription = (desc) => {
+    window.remotePeerConnection.setLocalDescription(desc);
+    trace(`Answer from remotePeerConnection \n ${desc.sdp}`);
+    window.localPeerConnection.setRemoteDescription(desc);
+  };
+
+  const gotLocalDescription = (desc) => {
+    window.localPeerConnection.setLocalDescription(desc);
+    trace(`Offer from localPeerConnection \n + ${desc.sdp}`);
+    window.remotePeerConnection.setRemoteDescription(desc);
+    window.remotePeerConnection.createAnswer(gotRemoteDescription, () => false);
+  };
+
+  const handleMessage = (event) => {
+    trace(`Received message: ${event.data}`);
+    document.getElementById('dataChannelReceive').value = event.data;
+  };
+
+  const handleReceiveChannelStateChange = () => {
+    const readyState = receiveChannel.readyState;
+    trace(`Receive channel state is : ${readyState}`);
+  };
+
+  const gotReceiveChannel = (event) => {
+    trace('receive channel callback');
+    receiveChannel = event.channel;
+    receiveChannel.onmessage = handleMessage;
+    receiveChannel.onopen = handleReceiveChannelStateChange;
+    receiveChannel.onclose = handleReceiveChannelStateChange;
+  };
+
+  const handleSendChannelStateChange = () => {
+    const readyState = sendChannel.readyState;
+    trace(`Send channel state is: ${readyState}`);
+    if (readyState === 'open') {
+      dataChannelSend.disabled = false;
+      dataChannelSend.focus();
+      dataChannelSend.placeholder = '';
+      sendButton.disabled = false;
+      closeButton.disabled = false;
+    } else {
+      dataChannelSend.disabled = true;
+      sendButton.disabled = true;
+      closeButton.disabled = true;
+    }
+  };
+
+  window.localPeerConnection = new RTCPeerConnection(servers,
+    {'optional': [{'RtpDataChannels': true}]});
+  trace('Created local peer connection object localPeerConnection');
+  try {
+    sendChannel = window.localPeerConnection.createDataChannel('sendDataChannel',
+      {'reliable': false});
+    trace('Created send data channel');
+  } catch (error) {
+    alert('Failed to create data channel.' +
+      ' need Chrome M25 or later with RtpDataChannel enabled.');
+    trace(`createDataChannel() failed with exception: ${error.message}`);
+  }
+  window.localPeerConnection.onicecandidate = gotLocalCandidate;
+  sendChannel.onopen = handleSendChannelStateChange;
+  sendChannel.onclose = handleSendChannelStateChange;
+
+  window.remotePeerConnection = new RTCPeerConnection(servers,
+    {'optional': [{'RtpDataChannels': true}]});
+  trace('Created remote peer connection object remotePeerConnection');
+
+  window.remotePeerConnection.onicecandidate = gotRemoteIceCandidate;
+  window.remotePeerConnection.ondatachannel = gotReceiveChannel;
+
+  window.localPeerConnection.createOffer(gotLocalDescription, () => false);
+  startButton.disabled = true;
+  closeButton.disabled = false;
+};
+
+const sendData = () => {
+  const data = dataChannelSend.value;
+  sendChannel.send(data);
+  trace(`Send data: ${data}`);
+};
+
+const closeDataChannels = () => {
+  trace('Closing data channels');
+  sendChannel.close();
+  trace(`Closed data channel with label: ${sendChannel.label}`);
+  receiveChannel.close();
+  trace(`Closed data channel with label: ${receiveChannel.label}`);
+  window.localPeerConnection.close();
+  window.remotePeerConnection.close();
+  window.localPeerConnection = null;
+  window.remotePeerConnection = null;
+  trace('Closed peer connections');
+  startButton.disabled = true;
+  closeButton.disabled = true;
+  dataChannelSend.value = '';
+  dataChannelReceive.value = '';
+  dataChannelSend.disabled = true;
+  dataChannelSend.placeholder = 'Press Start, enter some text, then press Send.';
 };
 
 $(() => {
   init();
 
   startButton.disabled = false;
-  callButton.disabled = true;
-  hangupButton.disabled = true;
+  sendButton.disabled = true;
+  closeButton.disabled = true;
 
-  startButton.onclick = () => {
-    trace('Requesting local stream');
-    startButton.disabled = true;
-    getUserMedia(constraints,
-      gotStream,
-      (error) => {
-        trace(`getUserMedia error: ${error}`);
-      });
-  };
-
-  callButton.onclick = () => {
-    var servers = null;
-    callButton.disabled = true;
-    hangupButton.disabled = false;
-    trace('Starting call');
-
-    if (localStream.getVideoTracks().length > 0) {
-      trace(`Using video device: ${localStream.getVideoTracks()[0].label}`);
-    }
-
-    (() => {
-      localPeerConnection = new RTCPeerConnection(servers);
-      trace('Created local peer connection object localPeerConnection');
-      localPeerConnection.onicecandidate = (event) => {
-        if (event.candidate) {
-          remotePeerConnection.addIceCandidate(new RTCIceCandidate(event.candidate));
-          trace(`Local ICE Candidate: \n ${event.candidate.candidate}`);
-        }
-      };
-    })();
-
-    (() => {
-      remotePeerConnection = new RTCPeerConnection(servers);
-      trace('Created remote peer connection object remotePeerConnection');
-      remotePeerConnection.onicecandidate = (event) => {
-        if (event.candidate) {
-          localPeerConnection.addIceCandidate(new RTCIceCandidate(event.candidate));
-          trace(`Remote ICE candidate: \n ${event.candidate.candidate}`);
-        }
-      };
-      remotePeerConnection.onaddstream = (event) => {
-        remoteVideo.src = URL.createObjectURL(event.stream);
-        trace('Received remote stream');
-      };
-    })();
-
-    (() => {
-      localPeerConnection.addStream(localStream);
-      trace('Added localStream to localPeerConnection');
-      localPeerConnection.createOffer(
-        (description) => {
-          localPeerConnection.setLocalDescription(description);
-          trace(`Offer from localPeerConnection: \n ${description.sdp}`);
-          remotePeerConnection.setRemoteDescription(description);
-          remotePeerConnection.createAnswer(
-            (desc) => {
-              remotePeerConnection.setLocalDescription(desc);
-              trace(`Answer from remotePeerConnection: \n ${desc.sdp}`);
-              localPeerConnection.setRemoteDescription(desc);
-            },
-            () => false
-          );
-        },
-        () => false
-      );
-    })();
-  };
-
-  hangupButton.onclick = () => {
-    trace('Ending call');
-    localPeerConnection.close();
-    remotePeerConnection.close();
-    localPeerConnection = null;
-    remotePeerConnection = null;
-    hangupButton.disabled = true;
-    callButton.disabled = false;
-  };
+  startButton.onclick = createConnection;
+  sendButton.onclick = sendData;
+  closeButton.onclick = closeDataChannels;
 });

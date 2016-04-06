@@ -16,6 +16,9 @@
       "io": true,
       "performance": true,
       "RTCPeerConnection": true
+    },
+    "rules": {
+      "no-alert": 1
     }
   },
   "repository": {
