@@ -11,6 +11,7 @@
     "dev:build": "node build.js",
     "prebuild": "npm run delete-public-js",
     "build": "browserify app/main.js -o public/lib/js/app.js",
+    "clean": "npm run delete-public-js",
     "delete-public-js": "rm -rf public/lib/js/*",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
