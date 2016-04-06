@@ -4,12 +4,18 @@
     <meta charset="utf-8">
     <title>WEBRTC</title>
     <link rel="stylesheet" href="ressources/style.css">
+    <script src='ressources/adapter.js'></script>
     <script src="http://code.jquery.com/jquery-1.11.1.js"></script>
     <script src="ressources/main.js"></script>
   </head>
   <body>
-    <video src="" autoplay poster="">
+    <video id="localVideo" autoplay></video>
+    <video id="remoteVideo" autoplay></video>
 
-    </video>
+    <div>
+      <button id="startButton">Start</button>
+      <button id="callButton">Call</button>
+      <button id="hangupButton">Hang Up</button>
+    </div>
   </body>
 </html>

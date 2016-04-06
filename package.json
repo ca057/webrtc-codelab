@@ -13,7 +13,9 @@
       "jquery": true
     },
     "globals": {
-      "io": true
+      "io": true,
+      "performance": true,
+      "RTCPeerConnection": true
     }
   },
   "repository": {
