@@ -1,10 +1,17 @@
 {
   "name": "webrtc-tutorials",
   "version": "0.0.1",
-  "description": "working through the webrtc-tutorials",
-  "main": "index.js",
+  "description": "building a simple socket.io-chat",
+  "main": "server.js",
   "private": true,
   "scripts": {
+    "server": "node server.js",
+    "dev:server": "nodemon server.js build.js",
+    "predev:build": "npm run delete-public-js",
+    "dev:build": "node build.js",
+    "prebuild": "npm run delete-public-js",
+    "build": "browserify app/main.js -o public/lib/js/app.js",
+    "delete-public-js": "rm -rf public/lib/js/*",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "eslintConfig": {
@@ -30,5 +37,15 @@
   "dependencies": {
     "express": "^4.10.2",
     "socket.io": "^1.4.5"
+  },
+  "devDependencies": {
+    "babel-cli": "^6.6.5",
+    "babel-preset-es2016": "^6.6.0",
+    "babelify": "^7.2.0",
+    "browserify": "^13.0.0",
+    "jquery": "^2.2.3",
+    "socket.io-client": "^1.4.5",
+    "uglifyify": "^3.0.1",
+    "watchify": "^3.7.0"
   }
 }

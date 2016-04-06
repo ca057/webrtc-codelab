@@ -1,8 +1,10 @@
+var $ = require('jquery');
+
 $(() => {
-  var socket = io();
+  var socket = io;
 
   var newMessage = () => {
-    $('html, body').animate({scrollTop: $(document).height()}, 500);
+    $('html, body').animate({'scrollTop': $(document).height()}, 500);
   };
 
   $('form').submit(() => {
