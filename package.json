@@ -6,6 +6,16 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
+  "eslintConfig": {
+    "env": {
+      "browser": true,
+      "node": true,
+      "jquery": true
+    },
+    "globals": {
+      "io": true
+    }
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/ca057/webrtc-codelab.git"
@@ -15,5 +25,8 @@
   "bugs": {
     "url": "://github.com/ca057/webrtc-codelab/issues"
   },
-  "homepage": "https://github.com/ca057/webrtc-codelab#readme"
+  "homepage": "https://github.com/ca057/webrtc-codelab#readme",
+  "devDependencies": {
+    "node-static": "^0.7.7"
+  }
 }
