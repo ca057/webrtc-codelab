@@ -1,14 +1,14 @@
-var localStream = {};
-var localPeerConnection = {};
-var remotePeerConnection = {};
-var localVideo = {};
-var remoteVideo = {};
-var startButton = {};
-var callButton = {};
-var hangupButton = {};
+let localStream = {};
+let localPeerConnection = {};
+let remotePeerConnection = {};
+let localVideo = {};
+let remoteVideo = {};
+let startButton = {};
+let callButton = {};
+let hangupButton = {};
 const constraints = {'video': true};
 
-var init = () => {
+const init = () => {
   localVideo = document.getElementById('localVideo');
   remoteVideo = document.getElementById('remoteVideo');
 
@@ -17,14 +17,14 @@ var init = () => {
   hangupButton = document.getElementById('hangupButton');
 };
 
-var trace = (text) => {
+const trace = (text) => {
   console.log(`${(performance.now() / 1000).toFixed(3)}: ${text}`);
 };
 
-var gotStream = (stream) => {
+const gotStream = (stream) => {
   trace('Receive local stream');
-  localVideo.src = URL.createObjectURL(stream);
   localStream = stream;
+  localVideo.src = URL.createObjectURL(localStream);
   callButton.disabled = false;
 };
 
