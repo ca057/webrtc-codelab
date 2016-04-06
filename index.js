@@ -1,37 +1,18 @@
 var express = require('express');
 var app = express();
 var http = require('http').Server(app);
-// new instance of socket.io, passing the http/server object
 var io = require('socket.io')(http);
-
-const simpleChat = (socket) => {
-  if (!socket) {
-    console.warn('No socket was passed, chat could not be set up.');
-    return false;
-  }
-  return {
-    'newClient': () => {
-      console.log('a user connected');
-      socket.broadcast.emit('info', 'Es gibt jemanden Neuen im Chat...');
-    },
-    'clientLeft': () => {
-      console.log('user disconnected');
-      socket.broadcast.emit('info', 'Es gibt eine Person weniger im Chat...');
-    },
-    'newMessage': (msg) => {
-      console.log(`message: ${msg}`);
-      socket.broadcast.emit('chat', msg);
-    }
-  };
-};
+var clienthandler = require('./src/clienthandler');
+var util = require('./src/util');
 
 app.use(express.static('public'));
 app.get('/', (req, res) => {
   res.sendFile(__dirname + '/public/index.html');
 });
 
+const gen = util.idGenerator();
 io.on('connection', (socket) => {
-  const chat = simpleChat(socket);
+  const chat = clienthandler.init(socket, gen.next().value);
   chat.newClient();
 
   socket.on('disconnect', () => {

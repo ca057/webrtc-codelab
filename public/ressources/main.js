@@ -14,8 +14,8 @@ $(() => {
     return false;
   });
 
-  socket.on('chat', (msg) => {
-    $('#messages').append($('<li class="partner">').text(msg));
+  socket.on('chat', (data) => {
+    $('#messages').append($('<li class="partner">').text(`${data.id}: ${data.msg}`));
     newMessage();
   });
 
